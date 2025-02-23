@@ -9,8 +9,8 @@ from googleapiclient.http import MediaFileUpload
 import wetteronline
 
 # KONFIGURATION
-#SERVICE_ACCOUNT_FILE = "credentials.json"  # GITHUB Deine JSON-Datei mit Service-Account-Zugang
-SERVICE_ACCOUNT_FILE = r"C:\Users\luebk\Documents\Python_Projects\google_cloud_credentials_weatherbot.json"  # Lokal Deine JSON-Datei mit Service-Account-Zugang
+SERVICE_ACCOUNT_FILE = "credentials.json"  # GITHUB Deine JSON-Datei mit Service-Account-Zugang
+#SERVICE_ACCOUNT_FILE = r"C:\Users\luebk\Documents\Python_Projects\google_cloud_credentials_weatherbot.json"  # Lokal Deine JSON-Datei mit Service-Account-Zugang
 GDRIVE_FOLDER_ID = "17OtfrNTzSV_CJficpftk7DCBGsw7m6XG"       # Google Drive Ordner-ID
 CSV_DATEI = "wetterdaten_wetteronline.csv"
 LOCATIONS = ["Zuerich", "Ibbenbueren", "Muenster", "Rigi-Kulm"] #Orte mit Lerzeichen immer mit - verbinden
