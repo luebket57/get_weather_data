@@ -13,7 +13,7 @@ import wetteronline
 SERVICE_ACCOUNT_FILE = r"C:\Users\luebk\Documents\Python_Projects\google_cloud_credentials_weatherbot.json"  # Lokal Deine JSON-Datei mit Service-Account-Zugang
 GDRIVE_FOLDER_ID = "17OtfrNTzSV_CJficpftk7DCBGsw7m6XG"       # Google Drive Ordner-ID
 CSV_DATEI = "wetterdaten_wetteronline.csv"
-LOCATIONS = ["Zuerich", "Ibbenbueren", "Muenster", "Rigi Kulm"]
+LOCATIONS = ["Zuerich", "Ibbenbueren", "Muenster", "Rigi-Kulm"] #Orte mit Lerzeichen immer mit - verbinden
 
 # 1️⃣ Wetterdaten für mehrere Orte abrufen
 def get_weather(staedte):
