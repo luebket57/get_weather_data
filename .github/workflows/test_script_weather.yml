@@ -1,0 +1,31 @@
+name: Wetterdaten abrufen
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # 09:00 UTC (z.B. 10:00 MEZ im Winter, 11:00 MESZ im Sommer)
+    - cron: '0 14 * * *' # 14:00 UTC (15:00 MEZ / 16:00 MESZ)
+    - cron: '0 20 * * *' # 20:00 UTC (21:00 MEZ / 22:00 MESZ)
+  workflow_dispatch:  # Ermöglicht manuelles Ausführen
+
+jobs:
+  fetch_weather:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Python installieren
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Abhängigkeiten installieren
+        run: |
+          pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client pandas wetteronline
+
+      - name: 🔑 Google Credentials speichern
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+
+      - name: Wetterdaten abrufen und speichern
+        run: python test_script_weather.py

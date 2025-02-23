@@ -1,0 +1,33 @@
+name: Wetterdaten abrufen meteoblue
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 09:00 UTC (z.B. 10:00 MEZ im Winter, 11:00 MESZ im Sommer)
+    - cron: '0 12 * * *' # 14:00 UTC (15:00 MEZ / 16:00 MESZ)
+    - cron: '0 18 * * *' # 20:00 UTC (21:00 MEZ / 22:00 MESZ)
+  workflow_dispatch:  # Ermöglicht manuelles Ausführen
+
+jobs:
+  fetch_weather:
+    runs-on: ubuntu-latest
+    env:
+        METEOBLUE_API_KEY: ${{ secrets.METEOBLUE_API_KEY }}
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Python installieren
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Abhängigkeiten installieren
+        run: |
+          pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client pandas requests
+
+      - name: 🔑 Google Credentials speichern
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+
+      - name: Wetterdaten abrufen und speichern
+        run: python get_meteoblue_data.py
