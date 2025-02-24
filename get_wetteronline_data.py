@@ -5,7 +5,8 @@ import datetime
 import random
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload, MediaIoBaseDownload
+import io
 import wetteronline
 
 # KONFIGURATION
@@ -82,6 +83,52 @@ def upload_to_gdrive():
         print(f"📤 Datei '{CSV_DATEI}' nicht gefunden. Lade neu hoch...")
         service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
+def download_existing_csv(service, file_id):
+    """Downloads the existing CSV from Google Drive and loads it into a DataFrame."""
+    request = service.files().get_media(fileId=file_id)
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+        _, done = downloader.next_chunk()
+    
+    fh.seek(0)
+    return pd.read_csv(fh)
+
+def upload_to_gdrive_direct():
+    service = authenticate_drive()
+    file_id = find_existing_file(service, CSV_DATEI)
+
+    # Neue Wetterdaten abrufen
+    df_new = get_weather(LOCATIONS)
+
+    # Falls Datei existiert: Alte Daten aus Google Drive laden
+    if file_id:
+        print(f"📂 Datei '{CSV_DATEI}' gefunden! Lade vorhandene Daten herunter...")
+        df_existing = download_existing_csv(service, file_id)
+        df_combined = pd.concat([df_existing, df_new], ignore_index=True)
+    else:
+        print(f"📤 Datei '{CSV_DATEI}' nicht gefunden. Erstelle eine neue Datei...")
+        df_combined = df_new
+
+    # DataFrame direkt in einen Memory-Stream schreiben (kein lokales Speichern)
+    csv_stream = io.BytesIO()
+    df_combined.to_csv(csv_stream, index=False)
+    csv_stream.seek(0)
+
+    # Datei-Metadaten für Google Drive
+    file_metadata = {"name": CSV_DATEI, "parents": [GDRIVE_FOLDER_ID]}
+    media = MediaIoBaseUpload(csv_stream, mimetype="text/csv", resumable=True)
+
+    # Datei in Google Drive hochladen (überschreiben oder neu erstellen)
+    if file_id:
+        service.files().update(fileId=file_id, media_body=media).execute()
+        print(f"✅ Datei '{CSV_DATEI}' erfolgreich aktualisiert!")
+    else:
+        service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+        print(f"✅ Datei '{CSV_DATEI}' erfolgreich hochgeladen!")
+
 if __name__ == "__main__":
-    update_csv(LOCATIONS)       # CSV lokal aktualisieren
-    upload_to_gdrive() # Datei in Google Drive hochladen oder ersetzen
+   # update_csv(LOCATIONS)       # CSV lokal aktualisieren
+   # upload_to_gdrive() # Datei in Google Drive hochladen oder ersetzen
+    upload_to_gdrive_direct()  # Datei in Google Drive hochladen oder ersetzen
